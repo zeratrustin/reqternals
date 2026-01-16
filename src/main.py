@@ -7,7 +7,14 @@ from playwright.async_api import async_playwright
 async def run(url):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
+        context = await browser.new_context(
+            extra_http_headers={
+                "Cache-Control": "no-cache",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
+        page = await context.new_page()
 
         requests_data = []
         console_data = []
@@ -16,7 +23,6 @@ async def run(url):
         async def handle_request(request):
             start_times[request] = time.perf_counter()
 
-        # Intercept responses to calculate duration
         async def handle_response(response):
             duration = "-"
 
